@@ -1,0 +1,24 @@
+name: retry-oracle
+on:
+  schedule: [{cron: "*/30 * * * *"}]
+  workflow_dispatch:
+concurrency: {group: retry, cancel-in-progress: false}
+jobs:
+  retry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install oci
+      - name: Retry
+        env:
+          OCI_USER: ${{ secrets.OCI_USER }}
+          OCI_FP: ${{ secrets.OCI_FP }}
+          OCI_TENANCY: ${{ secrets.OCI_TENANCY }}
+          OCI_KEY: ${{ secrets.OCI_KEY }}
+          SSH_PUB: ${{ secrets.SSH_PUB }}
+        run: |
+          python retry.py | tee out.txt
+          if grep -q '^SUCCES' out.txt; then echo "::error::VM CREEE"; exit 1; fi
