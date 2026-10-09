@@ -40,5 +40,5 @@ while time.time() < end:
             sys.exit(0)
         except oci.exceptions.ServiceError as e:
             print(f"{datetime.datetime.now():%H:%M:%S} {o}/{m}: {e.status} {e.message[:50]}", flush=True)
-            time.sleep(60 if e.status == 429 else 15)
-    time.sleep(90)
+            time.sleep(120 if e.status == 429 else 30)
+    time.sleep(60)
