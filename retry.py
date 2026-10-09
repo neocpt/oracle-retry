@@ -1,4 +1,4 @@
-"""Une session de retry (~25 min). Verifie d'abord qu'aucune VM minecraft-create n'existe."""
+"""Une session de retry (~5h40). Verifie d'abord qu'aucune VM minecraft-create n'existe."""
 import oci, os, time, sys, datetime
 
 cfg = {"user": os.environ["OCI_USER"], "fingerprint": os.environ["OCI_FP"], "tenancy": os.environ["OCI_TENANCY"],
@@ -24,7 +24,7 @@ subnet = [s for s in net.list_subnets(t, vcn_id=vcn.id).data if s.prohibit_publi
 img = cmp.list_images(t, operating_system="Canonical Ubuntu", operating_system_version="22.04",
                       shape="VM.Standard.A1.Flex", sort_by="TIMECREATED", sort_order="DESC").data[0]
 pub = os.environ["SSH_PUB"].strip()
-end = time.time() + 25 * 60
+end = time.time() + 340 * 60
 while time.time() < end:
     for o, m in [(4, 24), (2, 12), (1, 6)]:
         try:

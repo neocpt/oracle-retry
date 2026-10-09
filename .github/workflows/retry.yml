@@ -2,11 +2,12 @@ name: retry-oracle
 on:
   schedule: [{cron: "*/30 * * * *"}]
   workflow_dispatch:
+permissions: {actions: write, contents: read}
 concurrency: {group: retry, cancel-in-progress: false}
 jobs:
   retry:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 350
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -22,3 +23,9 @@ jobs:
         run: |
           python retry.py | tee out.txt
           if grep -q '^SUCCES' out.txt; then echo "::error::VM CREEE"; exit 1; fi
+      - name: Relance
+        if: success() || failure()
+        env: {GH_TOKEN: "${{ github.token }}"}
+        run: |
+          if grep -q '^SUCCES' out.txt 2>/dev/null; then exit 0; fi
+          gh workflow run retry.yml -R ${{ github.repository }}
